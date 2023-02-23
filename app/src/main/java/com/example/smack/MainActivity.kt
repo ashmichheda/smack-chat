@@ -1,5 +1,6 @@
 package com.example.smack
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import com.google.android.material.navigation.NavigationView
@@ -43,7 +44,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun loginBtnNavClicked(view: View) {
-
+        // Transition to LoginActivity page
+        val loginIntent = Intent(this, LoginActivity::class.java)
+        startActivity(loginIntent)
     }
 
     fun addChannelClicked(view: View) {
