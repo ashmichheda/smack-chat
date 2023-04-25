@@ -13,8 +13,6 @@ object AuthService {
 
     // replicate the POST register web request of postman in android studio
     fun registerService(context: Context, email: String, password: String, complete: (Boolean) -> Unit) {
-        val url = URL_REGISTER
-
         // equivalent to postman 'body' data
         val jsonBody = JSONObject()
         jsonBody.put("email", email)
@@ -22,7 +20,8 @@ object AuthService {
         val requestBody = jsonBody.toString()
 
         // creating the web request and passing in the json string data
-        val registerRequest = object: StringRequest(Request.Method.POST, url, Response.Listener { _ ->
+        val registerRequest = object: StringRequest(Method.POST, URL_REGISTER, Response.Listener { response ->
+            println(response)
             complete(true)
         }, Response.ErrorListener { error ->
             Log.d("ERROR", "Could not register user: $error")
