@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import com.example.smack.R
+import com.example.smack.Services.AuthService
 import java.util.*
 
 class CreateUserActivity : AppCompatActivity() {
@@ -50,6 +51,12 @@ class CreateUserActivity : AppCompatActivity() {
     }
 
     fun createUserClicked(view: View) {
-
+        AuthService.registerService(this, "j@j.com", "123456") {complete ->
+            if (complete) {
+                println("User successfully registered")
+            } else {
+                println("Error in user registration!.")
+            }
+        }
     }
 }
