@@ -53,6 +53,7 @@ class CreateUserActivity : AppCompatActivity() {
     }
 
     fun createUserClicked(view: View) {
+        val userName = findViewById<TextView>(R.id.createUserNameTxt).text.toString()
         val email: String = findViewById<TextView?>(R.id.createEmailTxt).text.toString()
         val password = findViewById<TextView>(R.id.createPasswordTxt).text.toString()
 
@@ -61,8 +62,11 @@ class CreateUserActivity : AppCompatActivity() {
                 println("User successfully registered")
                 AuthService.loginUser(this, email, password) {loginSuccess ->
                     if (loginSuccess) {
-                        println(AuthService.authToken)
-                        print(AuthService.userEmail)
+                        AuthService.createUser(this, userName, email, userAvatar, avatarColor) {createSuccess ->
+                            if (createSuccess) {
+                                finish()
+                            }
+                        }
                     }
                 }
             } else {
