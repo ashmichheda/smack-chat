@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
+import android.widget.TextView
+import androidx.core.widget.AutoScrollHelper
 import com.example.smack.R
 import com.example.smack.Services.AuthService
 import java.util.*
@@ -51,9 +53,18 @@ class CreateUserActivity : AppCompatActivity() {
     }
 
     fun createUserClicked(view: View) {
-        AuthService.registerService(this, "j@j.com", "123456") {complete ->
-            if (complete) {
+        val email: String = findViewById<TextView?>(R.id.createEmailTxt).text.toString()
+        val password = findViewById<TextView>(R.id.createPasswordTxt).text.toString()
+
+        AuthService.registerService(this, email, password) {registerSuccess ->
+            if (registerSuccess) {
                 println("User successfully registered")
+                AuthService.loginUser(this, email, password) {loginSuccess ->
+                    if (loginSuccess) {
+                        println(AuthService.authToken)
+                        print(AuthService.userEmail)
+                    }
+                }
             } else {
                 println("Error in user registration!.")
             }
