@@ -90,7 +90,7 @@ class MainActivity : AppCompatActivity() {
             val userImageNavHeader = findViewById<ImageView>(R.id.userImageNavHeader)
             val loginBtnNavHeader = findViewById<TextView>(R.id.loginBtnNavHeader)
 
-            userNameNavHeader.text = "Login"
+            userNameNavHeader.text = ""
             userEmailNavHeader.text = ""
             userImageNavHeader.setImageResource(R.drawable.profiledefault)
             userImageNavHeader.setBackgroundColor(Color.TRANSPARENT)
