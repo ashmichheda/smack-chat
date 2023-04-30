@@ -20,5 +20,6 @@ class LoginActivity : AppCompatActivity() {
         // When this button is clicked, go to CreateUserActivity page
         val createUserIntent = Intent(this, CreateUserActivity::class.java)
         startActivity(createUserIntent)
+        finish()
     }
 }
