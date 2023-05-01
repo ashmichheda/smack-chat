@@ -26,12 +26,16 @@ import com.example.smack.R
 import com.example.smack.Services.AuthService
 import com.example.smack.Services.UserDataService
 import com.example.smack.Utilities.BROADCAST_USER_DATA_CHANGE
+import com.example.smack.Utilities.SOCKET_URL
 import com.example.smack.databinding.ActivityMainBinding
+import io.socket.client.IO
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
+
+    val socket = IO.socket(SOCKET_URL)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,10 +56,26 @@ class MainActivity : AppCompatActivity() {
 
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
-        hideKeyboard()
+
+    }
+
+    override fun onResume() {
+        super.onResume()
         // Register a broadcast receiver
         LocalBroadcastManager.getInstance(this).registerReceiver(userDataChangeReceiver, IntentFilter(
             BROADCAST_USER_DATA_CHANGE))
+        socket.connect()
+    }
+
+    override fun onPause() {
+        // unregister the broadcast receiver
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(userDataChangeReceiver)
+        super.onPause()
+    }
+
+    override fun onDestroy() {
+        socket.disconnect()
+        super.onDestroy()
     }
 
     private val userDataChangeReceiver = object : BroadcastReceiver() {
@@ -120,11 +140,12 @@ class MainActivity : AppCompatActivity() {
                     val channelDesc = nameDescTextField.text.toString()
 
                     // Create channel with channel name and desc
-                    hideKeyboard()
+                    socket.emit("newChannel", channelName, channelDesc)
+
                 }
                 .setNegativeButton("Cancel") { dialogInterface, i ->
                     // Cancel and close the dialog
-                    hideKeyboard()
+
                 }
                 .show()
         } else {
@@ -140,6 +161,6 @@ class MainActivity : AppCompatActivity() {
 
 
     fun sendMsgBtnClicked(view: View) {
-
+        hideKeyboard()
     }
 }
