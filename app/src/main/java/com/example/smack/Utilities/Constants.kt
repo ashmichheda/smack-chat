@@ -9,3 +9,6 @@ const val URL_GET_USER = "${BASE_URL}/user/byEmail/"
 
 // Broadcast Constants
 const val BROADCAST_USER_DATA_CHANGE = "BROADCAST_USER_DATA_CHANGE"
+
+// Socket URL
+const val SOCKET_URL = "http://10.0.2.2:3005/"
