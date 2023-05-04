@@ -22,7 +22,7 @@ object AuthService {
 
 
     // replicate the POST /account/register web request of postman in android studio
-    fun registerService(context: Context, email: String, password: String, complete: (Boolean) -> Unit) {
+    fun registerService(email: String, password: String, complete: (Boolean) -> Unit) {
         // equivalent to postman 'body' data
         val jsonBody = JSONObject()
         jsonBody.put("email", email)
@@ -52,7 +52,7 @@ object AuthService {
     }
 
     // replicate the POST /account/login web request of postman in android studio (returns json object)
-    fun loginUser(context: Context, email: String, password: String, complete: (Boolean) -> Unit) {
+    fun loginUser(email: String, password: String, complete: (Boolean) -> Unit) {
 
         // equivalent to postman 'body' data
         val jsonBody = JSONObject()
@@ -94,7 +94,7 @@ object AuthService {
 
     }
 
-    fun createUser(context: Context, name: String, email: String, avatarName: String, avatarColor: String, complete: (Boolean) -> Unit) {
+    fun createUser(name: String, email: String, avatarName: String, avatarColor: String, complete: (Boolean) -> Unit) {
 
         // equivalent to postman 'body' data
         val jsonBody = JSONObject()
