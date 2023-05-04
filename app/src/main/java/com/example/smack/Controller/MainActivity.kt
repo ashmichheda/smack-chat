@@ -22,13 +22,16 @@ import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.example.smack.Model.Channel
 import com.example.smack.R
 import com.example.smack.Services.AuthService
+import com.example.smack.Services.MessageService
 import com.example.smack.Services.UserDataService
 import com.example.smack.Utilities.BROADCAST_USER_DATA_CHANGE
 import com.example.smack.Utilities.SOCKET_URL
 import com.example.smack.databinding.ActivityMainBinding
 import io.socket.client.IO
+import io.socket.emitter.Emitter
 
 class MainActivity : AppCompatActivity() {
 
@@ -56,6 +59,8 @@ class MainActivity : AppCompatActivity() {
 
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+        socket.connect()
+        socket.on("channelCreated", onNewChannel)
 
     }
 
@@ -64,17 +69,12 @@ class MainActivity : AppCompatActivity() {
         // Register a broadcast receiver
         LocalBroadcastManager.getInstance(this).registerReceiver(userDataChangeReceiver, IntentFilter(
             BROADCAST_USER_DATA_CHANGE))
-        socket.connect()
-    }
-
-    override fun onPause() {
-        // unregister the broadcast receiver
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(userDataChangeReceiver)
-        super.onPause()
     }
 
     override fun onDestroy() {
         socket.disconnect()
+        // unregister the broadcast receiver
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(userDataChangeReceiver)
         super.onDestroy()
     }
 
@@ -152,6 +152,18 @@ class MainActivity : AppCompatActivity() {
 
         }
     }
+
+    private val onNewChannel = Emitter.Listener { args ->
+        runOnUiThread {
+            val channelName = args[0] as String
+            val channelDescription = args[1] as String
+            val channelId = args[2] as String
+
+            val newChannel = Channel(channelName, channelDescription, channelId)
+            MessageService.channels.add(newChannel)
+        }
+    }
+
     fun hideKeyboard() {
         val inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         if (inputManager.isAcceptingText) {
