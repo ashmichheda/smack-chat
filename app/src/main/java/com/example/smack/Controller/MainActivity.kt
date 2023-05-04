@@ -21,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.smack.Model.Channel
+import com.example.smack.Model.Message
 import com.example.smack.R
 import com.example.smack.Services.AuthService
 import com.example.smack.Services.MessageService
@@ -68,6 +69,7 @@ class MainActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
         socket.connect()
         socket.on("channelCreated", onNewChannel)
+        socket.on("messageCreated", onNewMessage)
         setAdapters()
 
         channel_list.setOnItemClickListener { _, _, i, _ ->
@@ -199,6 +201,23 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private val onNewMessage = Emitter.Listener { args ->
+        runOnUiThread {
+            val msgBody = args[0] as String
+            val channelId = args[2] as String
+            val userName = args[3] as String
+            val userAvatar = args[4] as String
+            val userAvatarColor = args[5] as String
+            val id = args[6] as String
+            val timeStamp = args[7] as String
+
+            val message = Message(msgBody, userName, channelId, userAvatar, userAvatarColor, id, timeStamp)
+            MessageService.messages.add(message)
+
+        }
+    }
+
+
     fun hideKeyboard() {
         val inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         if (inputManager.isAcceptingText) {
@@ -208,6 +227,14 @@ class MainActivity : AppCompatActivity() {
 
 
     fun sendMsgBtnClicked(view: View) {
-        hideKeyboard()
+        val messageTextField = findViewById<TextView>(R.id.messageTextField)
+        if (App.prefs.isLoggedIn && messageTextField.text.isNotEmpty() && selectedChannel != null) {
+            val userId = UserDataService.id
+            val channelId = selectedChannel!!.id
+            socket.emit("newMessage", messageTextField.text.toString(), userId, channelId,
+                        UserDataService.name, UserDataService.avatarName, UserDataService.avatarColor)
+            messageTextField.clearComposingText()
+            hideKeyboard()
+        }
     }
 }
