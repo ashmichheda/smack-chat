@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Color
 import android.os.Bundle
-import android.service.autofill.UserData
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
@@ -69,6 +68,10 @@ class MainActivity : AppCompatActivity() {
         socket.on("channelCreated", onNewChannel)
         setAdapters()
 
+        if (App.prefs.isLoggedIn) {
+            AuthService.findUserByEmail(this){}
+        }
+
     }
 
     override fun onResume() {
@@ -93,7 +96,7 @@ class MainActivity : AppCompatActivity() {
             val userImageNavHeader = findViewById<ImageView>(R.id.userImageNavHeader)
 
             // update the UI with newly created user data
-            if (AuthService.isLoggedIn) {
+            if (App.prefs.isLoggedIn) {
                 // update the UI elements of the nav header
                 userNameNavHeader.text = UserDataService.name
                 userEmailNavHeader.text = UserDataService.email
@@ -118,7 +121,7 @@ class MainActivity : AppCompatActivity() {
 
     fun loginBtnNavClicked(view: View) {
 
-        if (AuthService.isLoggedIn) {
+        if (App.prefs.isLoggedIn) {
             // log out
             UserDataService.logout()
             val userNameNavHeader = findViewById<TextView>(R.id.userNameNavHeader)
@@ -140,7 +143,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun addChannelClicked(view: View) {
-        if (AuthService.isLoggedIn) {
+        if (App.prefs.isLoggedIn) {
             val builder = AlertDialog.Builder(this)
             val dialogView = layoutInflater.inflate(R.layout.add_channel_dialog, null)
             builder.setView(dialogView)
