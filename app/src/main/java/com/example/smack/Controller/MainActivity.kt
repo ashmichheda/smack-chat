@@ -18,6 +18,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.smack.Model.Channel
 import com.example.smack.R
@@ -29,6 +30,7 @@ import com.example.smack.Utilities.SOCKET_URL
 import com.example.smack.databinding.ActivityMainBinding
 import io.socket.client.IO
 import io.socket.emitter.Emitter
+import org.w3c.dom.Text
 
 class MainActivity : AppCompatActivity() {
 
@@ -36,12 +38,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     val socket = IO.socket(SOCKET_URL)
-
     lateinit var channelAdapter: ArrayAdapter<Channel>
+    var selectedChannel: Channel? = null
+    var channel_list = findViewById<ListView>(R.id.channel_list)
 
     private fun setAdapters() {
         channelAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, MessageService.channels)
-        var channel_list = findViewById<ListView>(R.id.channel_list)
         channel_list.adapter = channelAdapter
     }
 
@@ -67,6 +69,12 @@ class MainActivity : AppCompatActivity() {
         socket.connect()
         socket.on("channelCreated", onNewChannel)
         setAdapters()
+
+        channel_list.setOnItemClickListener { _, _, i, _ ->
+            selectedChannel = MessageService.channels[i]
+            drawerLayout.closeDrawer(GravityCompat.START)
+            updateWithChannel()
+        }
 
         if (App.prefs.isLoggedIn) {
             AuthService.findUserByEmail(this){}
@@ -105,13 +113,23 @@ class MainActivity : AppCompatActivity() {
                 userImageNavHeader.setImageResource(resourceId)
                 loginBtnNavHeader.text = "Logout"
 
-                MessageService.getChannels(context) {complete ->
+                MessageService.getChannels{complete ->
                     if (complete) {
-                        channelAdapter.notifyDataSetChanged()
+                        if (MessageService.channels.count() > 0) {
+                            selectedChannel = MessageService.channels[0]
+                            channelAdapter.notifyDataSetChanged()
+                            updateWithChannel()
+                        }
                     }
                 }
             }
         }
+    }
+
+    fun updateWithChannel() {
+        val mainChannelName = findViewById<TextView>(R.id.mainChannelName)
+        mainChannelName.text = "#${selectedChannel?.name}"
+        // download messages for the selected channel
     }
 
     override fun onSupportNavigateUp(): Boolean {
