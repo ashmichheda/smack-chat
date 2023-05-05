@@ -20,6 +20,9 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.smack.Adapters.MessageAdapter
 import com.example.smack.Model.Channel
 import com.example.smack.Model.Message
 import com.example.smack.R
@@ -40,12 +43,22 @@ class MainActivity : AppCompatActivity() {
 
     val socket = IO.socket(SOCKET_URL)
     lateinit var channelAdapter: ArrayAdapter<Channel>
+    lateinit var messageAdapter: MessageAdapter
+
     var selectedChannel: Channel? = null
     var channel_list = findViewById<ListView>(R.id.channel_list)
+    var messageListView = findViewById<RecyclerView>(R.id.messageListView)
 
     private fun setAdapters() {
         channelAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, MessageService.channels)
         channel_list.adapter = channelAdapter
+
+        messageAdapter = MessageAdapter(this, MessageService.messages)
+        messageListView.adapter = messageAdapter
+
+        val layoutManager = LinearLayoutManager(this)
+        messageListView.layoutManager = layoutManager
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -135,8 +148,9 @@ class MainActivity : AppCompatActivity() {
         if (selectedChannel != null) {
             MessageService.getMessages(selectedChannel!!.id) {complete ->
                 if (complete) {
-                    for(message in MessageService.messages) {
-                        println(message.message)
+                    messageAdapter.notifyDataSetChanged()
+                    if (messageAdapter.itemCount > 0) {
+                        messageListView.smoothScrollToPosition(messageAdapter.itemCount - 1)
                     }
                 }
 
@@ -154,6 +168,8 @@ class MainActivity : AppCompatActivity() {
         if (App.prefs.isLoggedIn) {
             // log out
             UserDataService.logout()
+            channelAdapter.notifyDataSetChanged()
+            messageAdapter.notifyDataSetChanged()
             val userNameNavHeader = findViewById<TextView>(R.id.userNameNavHeader)
             val userEmailNavHeader = findViewById<TextView>(R.id.userEmailNavHeader)
             val userImageNavHeader = findViewById<ImageView>(R.id.userImageNavHeader)
@@ -227,6 +243,8 @@ class MainActivity : AppCompatActivity() {
 
                     val message = Message(msgBody, userName, channelId, userAvatar, userAvatarColor, id, timeStamp)
                     MessageService.messages.add(message)
+                    messageAdapter.notifyDataSetChanged()
+                    messageListView.smoothScrollToPosition(messageAdapter.itemCount - 1)
                 }
 
             }
